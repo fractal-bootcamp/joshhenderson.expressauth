@@ -13,7 +13,7 @@ app.use(cookieParser());
 
 // make sure the app is listening to the port
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`app listening on port ${port}`)
 })
 
 // const users = [
@@ -38,15 +38,17 @@ app.listen(port, () => {
 //user first visiting the website: must check if they are already in a session otherwise redirect them to the login page
 app.get('/', async (req, res) => {
     //prisma query to check if req cookie matches user in database
-    const { username, password } = req.body
-    const user = await prisma.users.findUnique({
-        where: {
-            email: req.body.username,
-            password: req.body.password,
-        }
-    })
-
-    if (user === req.cookies) {
+    //const { username, password } = req.body
+    // const user = await prisma.users.findUnique({
+    //     where: {
+    //         email: req.body.email,
+    //     },
+    //     select: {
+    //         email: true
+    //     }
+    // })
+    console.log("line 47")
+    if (req.cookies) {
         res.redirect('/static/dashboard')
     } else {
         res.sendFile(__dirname + '/static/login.html');
@@ -84,7 +86,6 @@ app.post('/signup', async (req, res) => {
         const user = await prisma.users.findUnique({
             where: {
                 email: req.body.username,
-                password: req.body.password,
             }
         })
 
