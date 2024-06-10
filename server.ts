@@ -33,7 +33,7 @@ app.listen(port, () => {
 //if user has never signed up they are redirected to sign up page 
 
 
-
+//user first visiting the website: must check if they are already in a session otherwise redirect them to the login page
 app.get('/', async (req, res) => {
     //prisma query to check if req cookie matches user in database
     const { username, password } = req.body
@@ -41,31 +41,36 @@ app.get('/', async (req, res) => {
         where: {
             email: req.body.username,
             password: req.body.password,
-        },);
+        }
+    })
 
     if (user === req.cookies) {
         res.redirect('/static/dashboard')
-    };
-    else {
+    } else {
         res.sendFile(__dirname + '/static/login.html');
     }
-},
+
+})
 
 
 
+//Post request from the sign up page: create 
+app.get('/signup', (req, res) => {
+    res.sendFile(__dirname + "/static/signup.html")
+})
 
-    app.post('/signup', async (req, res) => {
-        const { username, password } = req.body
-        const user = await prisma.users.create({
-            data: {
-                email: req.body.username,
-                password: req.body.password,
-            },
-        },)
-        res.redirect(__dirname + '/static/failedlogin.html');
-    }),
+app.post('/signup', async (req, res) => {
+    const { username, password } = req.body
+    const user = await prisma.users.create({
+        data: {
+            email: req.body.username,
+            password: req.body.password,
+        },
+    },)
+    res.redirect(__dirname + '/static/failedlogin.html');
+}),
 
-    //post route receiving data 
+    //post route receiving data from login, checking if the 
     app.post('/', async (req, res) => {
         //prisma query to check if user input is valid/existing in database
         const { username, password } = req.body
@@ -73,21 +78,21 @@ app.get('/', async (req, res) => {
             where: {
                 email: req.body.username,
                 password: req.body.password,
-            },)
+            }
+        })
 
-        //if users is not in the database rediret to failed login page
-
+        //if user is not in the database rediret to failed login page
         if (!user) {
             res.redirect(__dirname + '/static/failedlogin.html');
-        },
-
-        //if prisma query succeeds, assign req data to a user object to be passed in to res.cookie function.
-        //res function should update the client with a cookie to preserve user session and redirect to dashboard
-
+        }
         else {
+            //if prisma query succeeds, assign req data to a user object to be passed in to res.cookie function.
+            //res function should update the client with a cookie to preserve user session and redirect to dashboard
             res.cookie('userId, user.email, { httpOnly: true }')
             res.redirect('/static/dashboard')
         }
+
+
     });
 
 
