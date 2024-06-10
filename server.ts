@@ -1,5 +1,6 @@
 import { urlencoded } from "body-parser";
-
+import prisma from "./client";
+import { PrismaClient } from '@prisma/client'
 const express = require('express')
 const app = express() //create an express app
 const port = 3000
@@ -13,10 +14,6 @@ app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
 
-// app.use {
-//     secret: 'Major Key'
-// })
-
 // const users = [
 //     {
 //         email: "jill@jill.com",
@@ -28,52 +25,71 @@ app.listen(port, () => {
 //     }
 // ]
 
-// Route to Login - everyone must authenticate
+// Route to Login - everyone must authenticate 
 
 
 // if user is authenticated then redirect to dashboard
 //if user is not authenticated then they must log in and receive a cookie
 //if user has never signed up they are redirected to sign up page 
-function isAuthenticated(req: Request, res) {
-    const cookie = req.;
-    if (cookie === undefined) {
-        res.cookie
-    }
-    // this is only called when there is an authenticated user due to cookie being undefined
-    app.get('/', isAuthenticated, function (req, res) {
-        res.send(__dirname + '/static/login.html')
-    })
 
-    app.get('/', (req, res) => {
+
+
+app.get('/', async (req, res) => {
+    //prisma query to check if req cookie matches user in database
+    const { username, password } = req.body
+    const user = await prisma.users.findUnique({
+        where: {
+            email: req.body.username,
+            password: req.body.password,
+        },);
+
+    if (user === req.cookies) {
+        res.redirect('/static/dashboard')
+    };
+    else {
         res.sendFile(__dirname + '/static/login.html');
+    }
+},
+
+
+
+
+    app.post('/signup', async (req, res) => {
+        const { username, password } = req.body
+        const user = await prisma.users.create({
+            data: {
+                email: req.body.username,
+                password: req.body.password,
+            },
+        },)
+        res.redirect(__dirname + '/static/failedlogin.html');
+    }),
+
+    //post route receiving data 
+    app.post('/', async (req, res) => {
+        //prisma query to check if user input is valid/existing in database
+        const { username, password } = req.body
+        const user = await prisma.users.findUnique({
+            where: {
+                email: req.body.username,
+                password: req.body.password,
+            },)
+
+        //if users is not in the database rediret to failed login page
+
+        if (!user) {
+            res.redirect(__dirname + '/static/failedlogin.html');
+        },
+
+        //if prisma query succeeds, assign req data to a user object to be passed in to res.cookie function.
+        //res function should update the client with a cookie to preserve user session and redirect to dashboard
+
+        else {
+            res.cookie('userId, user.email, { httpOnly: true }')
+            res.redirect('/static/dashboard')
+        }
     });
 
-};
-
-
-
-//post route
-app.post('/', (req, res) => {
-    // sign in code
-    const username = req.body.username;
-    const password = req.body.password;
-
-
-    const user = users.find(user => user.email === req.body.username && user.password == req.body.password)
-
-    if (user) {
-        req.session.user = req.body.email
-        req.session.regenerate
-        req.session.save
-
-        res.redirect('/static/dashboard')
-    }
-    else {
-        res.sendFile(__dirname + '/static/failedlogin.html');
-    }
-
-
-});
 
 // get cookies 
 //check for auth cookies 
