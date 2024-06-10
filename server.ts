@@ -1,39 +1,60 @@
+import { urlencoded } from "body-parser";
+
 const express = require('express')
 const app = express() //create an express app
 const port = 3000
 const bodyParser = require('body-parser'); // middleware
-app.use(bodyParser.urlencoded({ extended: false }));
+const cookieParser = require('cookie-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
+// make sure the app is listening to the port
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
 
-const users = [
-    {
-        email: "jill@jill.com",
-        password: "passwordone"
-    },
-    {
-        email: "josh@gmail.com",
-        password: "passwordtwo"
+// app.use {
+//     secret: 'Major Key'
+// })
+
+// const users = [
+//     {
+//         email: "jill@jill.com",
+//         password: "passwordone"
+//     },
+//     {
+//         email: "josh@gmail.com",
+//         password: "passwordtwo"
+//     }
+// ]
+
+// Route to Login - everyone must authenticate
+
+
+// if user is authenticated then redirect to dashboard
+//if user is not authenticated then they must log in and receive a cookie
+//if user has never signed up they are redirected to sign up page 
+function isAuthenticated(req: Request, res) {
+    const cookie = req.;
+    if (cookie === undefined) {
+        res.cookie
     }
-]
+    // this is only called when there is an authenticated user due to cookie being undefined
+    app.get('/', isAuthenticated, function (req, res) {
+        res.send(__dirname + '/static/login.html')
+    })
 
-console.log("hello world")
+    app.get('/', (req, res) => {
+        res.sendFile(__dirname + '/static/login.html');
+    });
 
-
-
-
-// Route to Login
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/static/login.html');
-});
+};
 
 
 
 //post route
 app.post('/', (req, res) => {
-    // Insert Login Code Here
+    // sign in code
     const username = req.body.username;
     const password = req.body.password;
 
@@ -41,7 +62,11 @@ app.post('/', (req, res) => {
     const user = users.find(user => user.email === req.body.username && user.password == req.body.password)
 
     if (user) {
-        res.sendFile(__dirname + '/static/dashboard.html');
+        req.session.user = req.body.email
+        req.session.regenerate
+        req.session.save
+
+        res.redirect('/static/dashboard')
     }
     else {
         res.sendFile(__dirname + '/static/failedlogin.html');
