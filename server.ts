@@ -4,8 +4,10 @@ import { PrismaClient } from '@prisma/client'
 const express = require('express')
 const app = express() //create an express app
 const port = 3000
+
 const bodyParser = require('body-parser'); // middleware
-const cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser'); // middleware
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -52,13 +54,18 @@ app.get('/', async (req, res) => {
 
 })
 
+//primary get route  for the dashboard
+app.get('/dashboard', (req, res) => {
+    res.sendFile(__dirname + "/static/signup.html")
+})
 
 
-//Post request from the sign up page: create 
+// primary get route for signup 
 app.get('/signup', (req, res) => {
     res.sendFile(__dirname + "/static/signup.html")
 })
 
+//Post request from the sign up page: create 
 app.post('/signup', async (req, res) => {
     const { username, password } = req.body
     const user = await prisma.users.create({
